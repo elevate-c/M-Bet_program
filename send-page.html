@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading Page</title>
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    /* Style général */
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+      color: #333;
+      text-align: center;
+    }
+
+    /* Container principal */
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Icône dynamique */
+    .icon {
+      font-size: 100px; /* Taille des icônes */
+      transition: color 0.3s, transform 0.3s;
+    }
+
+    .icon.loading {
+      color: #3498db; /* Bleu pour le chargement */
+    }
+
+    .icon.success {
+      color: #2ecc71; /* Vert pour le succès */
+    }
+
+    .icon.error {
+      color: #e74c3c; /* Rouge pour les erreurs */
+    }
+
+    /* Messages */
+    .message {
+      font-size: 24px; /* Texte plus grand */
+      font-weight: bold;
+      display: none; /* Caché par défaut */
+    }
+
+    .message.loading {
+      color: #3498db; /* Texte bleu pendant le chargement */
+    }
+
+    .message.success {
+      color: #2ecc71; /* Texte vert pour le succès */
+    }
+
+    .message.error {
+      color: #e74c3c; /* Texte rouge pour les erreurs */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Icône de chargement -->
+    <i class="fa fa-spinner fa-pulse icon loading" id="status-icon"></i>
+    
+    <!-- Messages -->
+    <p class="message loading" id="loading-message">Sending request, please wait...</p>
+    <p class="message success" id="success-message">Request successfully sended.</p>
+    <p class="message error" id="error-message"></p>
+  </div>
+
+  <script>
+    // Sélection des éléments
+    const statusIcon = document.getElementById('status-icon');
+    const loadingMessage = document.getElementById('loading-message');
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+
+    // Récupérer les paramètres de l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDeveloper = urlParams.get('isDeveloper');
+    const name = urlParams.get('name');
+    const email = urlParams.get('email');
+    const description = urlParams.get('description');
+
+    // Fonction pour envoyer la requête
+    function sendRequest() {
+      // Afficher l'état de chargement
+      loadingMessage.style.display = 'block';
+      successMessage.style.display = 'none';
+      errorMessage.style.display = 'none';
+      statusIcon.className = 'fa fa-spinner fa-pulse icon loading';
+
+      // Vérifier que tous les paramètres sont fournis
+      if (!isDeveloper || !name || !email || !description) {
+        handleError('Missing required parameters. Please provide isDeveloper, name, email, and description.');
+        return;
+      }
+
+      // Construire l'URL de l'API
+      const apiUrl = `https://script.google.com/macros/s/AKfycbw0Az4g8BYJJOFWiJ7xsjN0YYldqvhor_psC0xpOKXb8GzgJsxnEK-peqcA1-oaoJu-/exec?action=requestAccess&isDeveloper=${encodeURIComponent(isDeveloper)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&description=${encodeURIComponent(description)}`;
+
+      // Envoyer la requête
+      fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Request failed with status ' + response.status);
+          }
+          return response.text();
+        })
+        .then(data => {
+          if (data.includes('Error')) {
+            throw new Error(data);
+          }
+          // Succès
+          statusIcon.className = 'fa fa-check-circle icon success';
+          loadingMessage.style.display = 'none';
+          successMessage.style.display = 'block';
+
+          // Fermer la page après 5 secondes
+          setTimeout(() => {
+            window.close();  // Ferme la page
+          }, 2000);
+        })
+        .catch(error => {
+          // Gestion des erreurs
+          handleError(error.message);
+        });
+    }
+
+    // Gestion des erreurs
+    function handleError(message) {
+      statusIcon.className = 'fa fa-times-circle icon error';
+      loadingMessage.style.display = 'none';
+      errorMessage.textContent = `Error: ${message}`;
+      errorMessage.style.display = 'block';
+    }
+
+    // Lancer l'envoi automatiquement dès que la page se charge
+    window.onload = sendRequest;
+  </script>
+</body>
+</html>
