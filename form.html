@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beta Program Access</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .form-container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    textarea {
+      resize: none;
+    }
+
+    button {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .terms {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .terms span {
+      margin-top: 5px;
+    }
+
+    .terms a {
+      text-decoration: none;
+      color: #3498db;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Beta Program Access</h2>
+    <form id="betaForm">
+      <div class="form-group">
+        <label><strong>Are you a Shortcut Developer?</strong></label>
+        <div class="radio-group">
+          <input type="radio" id="devYes" name="isDeveloper" value="Yes" required>
+          <label for="devYes">Yes</label>
+          <input type="radio" id="devNo" name="isDeveloper" value="No">
+          <label for="devNo">No</label>
+        </div>
+      </div>
+
+      <!-- Developer-specific fields -->
+      <div id="developerFields" class="hidden">
+        <div class="form-group">
+          <label for="devName"><strong>RoutineHub Username</strong></label>
+          <input type="text" id="devName" name="name" placeholder="Enter your RoutineHub username">
+        </div>
+        <div class="form-group">
+          <label for="devEmail"><strong>Email</strong></label>
+          <input type="email" id="devEmail" name="email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="devReason"><strong>Your Deal</strong></label>
+          <textarea id="devReason" name="reason" placeholder="Describe your deal and why you want access"></textarea>
+        </div>
+      </div>
+
+      <!-- Non-developer-specific fields -->
+      <div id="nonDeveloperFields" class="hidden">
+        <div class="form-group">
+          <label for="userName"><strong>Name</strong></label>
+          <input type="text" id="userName" name="name" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+          <label for="userEmail"><strong>Email</strong></label>
+          <input type="email" id="userEmail" name="email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="userReason"><strong>Why do you want to join the Beta Program?</strong></label>
+          <textarea id="userReason" name="reason" placeholder="Explain your motivation"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group terms hidden" id="termsContainer">
+        <input type="checkbox" id="terms" name="terms" required>
+        <span><strong>I agree with <a href="terms-and-conditions.html" target="_blank">terms & conditions</a></strong></span>
+      </div>
+
+      <button type="submit" id="submitButton" class="hidden">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('betaForm');
+    const devYes = document.getElementById('devYes');
+    const devNo = document.getElementById('devNo');
+    const developerFields = document.getElementById('developerFields');
+    const nonDeveloperFields = document.getElementById('nonDeveloperFields');
+    const submitButton = document.getElementById('submitButton');
+    const termsContainer = document.getElementById('termsContainer');
+
+    function clearFields(fields) {
+      fields.forEach((id) => {
+        document.getElementById(id).value = "";
+      });
+    }
+
+    form.addEventListener('change', () => {
+      if (devYes.checked) {
+        developerFields.classList.remove('hidden');
+        nonDeveloperFields.classList.add('hidden');
+        clearFields(['userName', 'userEmail', 'userReason']);
+      } else if (devNo.checked) {
+        nonDeveloperFields.classList.remove('hidden');
+        developerFields.classList.add('hidden');
+        clearFields(['devName', 'devEmail', 'devReason']);
+      }
+      submitButton.classList.remove('hidden');
+      termsContainer.classList.remove('hidden');
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const isDeveloper = document.querySelector('input[name="isDeveloper"]:checked');
+      let fieldsToCheck = isDeveloper.value === "Yes"
+        ? ['devName', 'devEmail', 'devReason']
+        : ['userName', 'userEmail', 'userReason'];
+
+      const loadingPageUrl = `/send-page.html?` +
+        `isDeveloper=${encodeURIComponent(isDeveloper.value)}` +
+        `&name=${encodeURIComponent(document.getElementById(fieldsToCheck[0]).value)}` +
+        `&email=${encodeURIComponent(document.getElementById(fieldsToCheck[1]).value)}` +
+        `&description=${encodeURIComponent(document.getElementById(fieldsToCheck[2]).value)}`;
+
+      window.location.href = loadingPageUrl;
+    });
+  </script>
+</body>
+</html>
